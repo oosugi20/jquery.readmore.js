@@ -11,12 +11,49 @@
 </style>
 <script>
 $(function () {
-	$('[data-readmore]').readmore();
+	var btnctrl = function ($el, readmore) {
+		$el.hide();
+		alert("check next");
+		readmore.fetch(readmore.url).done(function (data) {
+			if (data) {
+				$el.show();
+				alert("has next");
+			} else {
+				alert("not has next (empty)");
+			}
+		}).fail(function () {
+			alert("not has next (error)");
+		});
+	};
+
+	$('[data-readmore]').readmore().on('readmore:initialized', function () {
+		var $this = $(this);
+		var readmore = $this.data('readmore');
+		readmore.count = readmore.count || 1;
+		btnctrl($this, readmore);
+	}).on('readmore:beforePull', function () {
+		alert("redmore:beforePull\nex. show loading");
+	}).on('readmore:afterPull', function () {
+		alert("redmore:afterPull\nex. hide loading");
+	}).on('readmore:appended', function () {
+		var $this = $(this);
+		var readmore = $this.data('readmore');
+		readmore.count = readmore.count + 1;
+		readmore.url = 'more' + readmore.count + '.html';
+		alert("redmore:appended");
+		btnctrl($this, readmore);
+	});
 });
 </script>
 </head>
 
 <body>
-<div data-readmore></div>
+<div>1</div>
+<div>2</div>
+<div>3</div>
+<div>4</div>
+<div>5</div>
+<div id="mores"></div>
+<a href="#" data-readmore data-readmore-url="more.html" data-readmore-target="#mores">read more</a>
 </body>
 </html>

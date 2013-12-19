@@ -21,20 +21,63 @@ Module = function (element, options) {
 	 * init
 	 */
 	fn.init = function () {
-		this._prepareElms();
+		this.url = this.$el.attr('data-readmore-url');
+		this.target = this.$el.attr('data-readmore-target');
+		this.$target = $(this.target);
 		this._eventify();
+		var _this = this;
+		setTimeout(function () {
+			_this.$el.trigger('readmore:initialized');
+		}, 4);
 	};
 
 	/**
-	 * _prepareElms
+	 * fetch
 	 */
-	fn._prepareElms = function () {
+	fn.fetch = function (url) {
+		return $.Deferred(function (defer) {
+			$.ajax({
+				dataType: 'html',
+				url: url,
+				success: defer.resolve,
+				error: defer.reject
+			});
+		}).promise();
+	};
+
+	/**
+	 * append
+	 */
+	fn.append = function (data) {
+		this.$target.append(data);
+		this.$el.trigger('readmore:appended');
+	};
+
+	/**
+	 * pull
+	 */
+	fn.pull = function () {
+		var _this = this;
+		this.$el.trigger('readmore:beforePull');
+		this.fetch(this.url).then(function (data) {
+			_this.$el.trigger('readmore:afterPull');
+			_this.append(data);
+		});
+	};
+
+	/**
+	 * clicked
+	 */
+	fn.clicked = function (event) {
+		event.preventDefault();
+		this.pull();
 	};
 
 	/**
 	 * _eventify
 	 */
 	fn._eventify = function () {
+		this.$el.on('click', $.proxy(this.clicked, this));
 	};
 
 })(Module.prototype);
